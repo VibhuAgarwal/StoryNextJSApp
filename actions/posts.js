@@ -1,7 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { storePost } from "@/lib/posts";
-
+import { uploadImage } from "@/lib/cloudinary";
 
 export default async function createPost(prevState, formData) {
   const title = formData.get("title");
@@ -26,8 +26,16 @@ export default async function createPost(prevState, formData) {
     return { errors };
   }
 
+  // Upload image to cloudinary
+  let imageUrl;
+  try {
+    imageUrl = await uploadImage(image);
+  } catch (error) {
+    throw new Error("Failed to upload image");
+  }
+
   await storePost({
-    imageUrl: "",
+    imageUrl: imageUrl,
     title,
     content,
     userId: 1,
